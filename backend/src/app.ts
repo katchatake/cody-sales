@@ -18,12 +18,14 @@ import { authRoutes } from "./modules/auth/infrastructure/AuthRoutes";
 import { catalogRoutes } from "./modules/catalog/infrastructure/CatalogRoutes";
 import { goalRoutes } from "./modules/goals/infrastructure/GoalRoutes";
 import { saleRoutes } from "./modules/sales/infrastructure/SaleRoutes";
+import { progressRoutes } from "./modules/progress/infrastructure/ProgressRoutes";
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/sales", saleRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/catalog", catalogRoutes);
+app.use("/api/v1/progress", progressRoutes);
 
 // Catch-all route for unknown paths
 app.use((req: Request, res: Response, next: NextFunction) => {
