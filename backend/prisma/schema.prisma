@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  role      Role     @default(PROMOTOR)
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goals         Goal[]
+  sales         Sale[]
+  goalAchieveds GoalAchieved[]
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  PROMOTOR
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id         Int      @id @default(autoincrement())
+  name       String
+  price      Float
+  categoryId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id])
+  sales    Sale[]
+}
+
+model Goal {
+  id         Int      @id @default(autoincrement())
+  promotorId Int
+  target     Float
+  month      Int // 1-12
+  year       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  promotor User @relation(fields: [promotorId], references: [id])
+}
+
+model Sale {
+  id         Int      @id @default(autoincrement())
+  promotorId Int
+  productId  Int
+  quantity   Int
+  total      Float
+  saleDate   DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  promotor User    @relation(fields: [promotorId], references: [id])
+  product  Product @relation(fields: [productId], references: [id])
+}
+
+model GoalAchieved {
+  id          Int      @id @default(autoincrement())
+  promotorId  Int
+  typeHito    String
+  dateCreated DateTime @default(now())
+
+  promotor User @relation(fields: [promotorId], references: [id])
+}
