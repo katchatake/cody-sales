@@ -17,10 +17,11 @@ app.get("/health", (req, res) => {
 import { authRoutes } from "./modules/auth/infrastructure/AuthRoutes";
 import { catalogRoutes } from "./modules/catalog/infrastructure/CatalogRoutes";
 import { goalRoutes } from "./modules/goals/infrastructure/GoalRoutes";
+import { saleRoutes } from "./modules/sales/infrastructure/SaleRoutes";
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
-// app.use('/api/v1/sales', saleRoutes);
+app.use("/api/v1/sales", saleRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/catalog", catalogRoutes);
 
