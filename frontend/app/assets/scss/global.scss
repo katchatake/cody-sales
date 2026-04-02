@@ -1,0 +1,51 @@
+// Global SCSS Configuration
+
+// Variables CSS que reflejan los tokens en Vuetify.
+// Vuetify automáticamente genera variables var(--v-theme-xxx) en base a su tema.
+
+:root {
+  // Escala Tipográfica (Nombrada - Semantic)
+  --text-heading-xl: 2.25rem;  /* 36px */
+  --text-heading-lg: 1.875rem; /* 30px */
+  --text-heading-md: 1.5rem;   /* 24px */
+  --text-heading-sm: 1.25rem;  /* 20px */
+  
+  --text-body-lg: 1.125rem;    /* 18px */
+  --text-body-md: 1rem;        /* 16px */
+  --text-body-sm: 0.875rem;    /* 14px */
+  --text-caption: 0.75rem;     /* 12px */
+
+  --font-family-base: 'Inter', 'Roboto', sans-serif;
+}
+
+html, body {
+  background-color: var(--v-theme-surface-subtle);
+  font-family: var(--font-family-base);
+  color: var(--v-theme-text-base);
+}
+
+// Clases utilitarias de texto semánticas (Tipografía nombrada)
+.text-heading-xl { font-size: var(--text-heading-xl) !important; font-weight: 900; line-height: 1.2; color: var(--v-theme-text-heading); }
+.text-heading-lg { font-size: var(--text-heading-lg) !important; font-weight: 800; line-height: 1.3; color: var(--v-theme-text-heading); }
+.text-heading-md { font-size: var(--text-heading-md) !important; font-weight: 700; line-height: 1.4; color: var(--v-theme-text-heading); }
+.text-heading-sm { font-size: var(--text-heading-sm) !important; font-weight: 600; line-height: 1.4; color: var(--v-theme-text-heading); }
+
+.text-body-lg { font-size: var(--text-body-lg) !important; line-height: 1.5; color: var(--v-theme-text-base); }
+.text-body-md { font-size: var(--text-body-md) !important; line-height: 1.5; color: var(--v-theme-text-base); }
+.text-body-sm { font-size: var(--text-body-sm) !important; line-height: 1.5; color: var(--v-theme-text-base); }
+
+.text-muted { color: var(--v-theme-text-muted) !important; }
+
+// Clases de Fondos Semánticos
+.bg-surface-base { background-color: var(--v-theme-surface-base) !important; }
+.bg-surface-subtle { background-color: var(--v-theme-surface-subtle) !important; }
+.bg-surface-elevated { background-color: var(--v-theme-surface-elevated) !important; }
+
+// Modificadores de Vistas y Componentes Base
+.shadow-base {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
