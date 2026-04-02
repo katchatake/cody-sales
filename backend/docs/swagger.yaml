@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: Cody Sales API
+  description: Sistema central del backend demostrativo usando Arquitectura Hexagonal.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Servidor de Desarrollo Local
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginCredentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: promotor@example.com
+        password:
+          type: string
+          example: 123456
+
+    GoalCreation:
+      type: object
+      description: Requisitos estrictos de Joi
+      required:
+        - promotorId
+        - target
+        - month
+        - year
+      properties:
+        promotorId:
+          type: integer
+          description: ID del promotor asignado
+          example: 3
+        target:
+          type: number
+          minimum: 0.0001
+          description: Monto positivo de la meta
+          example: 50000
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+          example: 4
+        year:
+          type: integer
+          minimum: 1900
+          example: 2026
+
+    SaleCreation:
+      type: object
+      description: Validado vía Joi (SaleValid) prescindiendo del promotorId (leído vía Token seguro)
+      required:
+        - productId
+        - quantity
+        - total
+      properties:
+        productId:
+          type: integer
+          example: 5
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        total:
+          type: number
+          minimum: 0.0001
+          example: 1530.50
+
+paths:
+  /auth/login:
+    post:
+      summary: Iniciar Sesión
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginCredentials'
+      responses:
+        '200':
+          description: Token firmado exitosamente
+
+  /catalog:
+    get:
+      summary: Obtener todas las categorías
+      tags: [Catalog]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de Categorías de catálogo (Protegido por prohibición a Promotores)
+
+  /goals:
+    post:
+      summary: Registrar una nueva Meta
+      tags: [Goals]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalCreation'
+      responses:
+        '201':
+          description: Meta generada exitosamente
+        '403':
+          description: Acceso prohibido (Los Promotores no pueden asignar metas)
+        '409':
+          description: Conflicto (El promotor ya tiene meta este mes)
+    get:
+      summary: Listar todas las metas
+      tags: [Goals]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Retorna metas anidadas y ordenadas
+
+  /sales:
+    post:
+      summary: Registrar una venta de forma segura
+      tags: [Sales]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleCreation'
+      responses:
+        '201':
+          description: Venta exitosa. Puede retornar la cabecera `X-process-goal` si la venta destraba un milestone.
+          headers:
+            X-process-goal:
+              description: Texto de notificación en caso de alcanzar un umbral de 50, 80 o 100% de la meta de este mes.
+              schema:
+                type: string
+    get:
+      summary: Historial completo de ventas en crudo
+      tags: [Sales]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Listado de ventas global
+
+  /sales/user/{id}:
+    get:
+      summary: Filtrar ventas de un usuario (promotor) exclusivo
+      tags: [Sales]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del promotor en la base de datos
+      responses:
+        '200':
+          description: Ventas exclusivas de este ID
+
+  /progress:
+    get:
+      summary: Reporte cruzado macro del progreso de todos los usuarios
+      tags: [Progress]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: month
+          schema:
+            type: integer
+          description: Opcional. Mes (1-12)
+        - in: query
+          name: year
+          schema:
+            type: integer
+          description: Opcional. Año a consultar
+      responses:
+        '200':
+          description: Colección estadística de performance
+
+  /progress/{id}:
+    get:
+      summary: Progreso exclusivo de un promotor
+      tags: [Progress]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID Numérico del usuario a auditar
+        - in: query
+          name: month
+          schema:
+            type: integer
+          description: Opcional. Mes (1-12)
+        - in: query
+          name: year
+          schema:
+            type: integer
+          description: Opcional. Año a consultar
+      responses:
+        '200':
+          description: Devuelve las limitantes de Hito actual consolidado

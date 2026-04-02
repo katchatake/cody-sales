@@ -1,13 +1,22 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { notFound } from "@hapi/boom";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
 
 const app: Application = express();
+
+// Load Document definition
+const swaggerDocument = YAML.load(path.join(__dirname, "../docs/swagger.yaml"));
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Swagger Interface
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Health Check
 app.get("/health", (req, res) => {
