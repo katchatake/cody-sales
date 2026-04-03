@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.goalRoutes = void 0;
+const express_1 = require("express");
+const GoalController_1 = require("./GoalController");
+const validateRequest_1 = require("../../../shared/infrastructure/middlewares/validateRequest");
+const authMiddleware_1 = require("../../../shared/infrastructure/middlewares/authMiddleware");
+const GoalValid_1 = require("./GoalValid");
+exports.goalRoutes = (0, express_1.Router)();
+const goalController = new GoalController_1.GoalController();
+exports.goalRoutes.post("/", authMiddleware_1.verifyToken, (0, authMiddleware_1.forbidRoles)("PROMOTOR"), (0, validateRequest_1.validateRequest)(GoalValid_1.createGoalSchema), goalController.createGoal.bind(goalController));
+exports.goalRoutes.get("/", authMiddleware_1.verifyToken, goalController.getGoals.bind(goalController));
