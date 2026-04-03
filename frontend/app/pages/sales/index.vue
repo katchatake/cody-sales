@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-heading-xl text-heading mb-1">Ventas y Facturación</h1>
+        <h1 class="text-heading-xl text-heading mb-1">Ventas</h1>
         <p class="text-body-md text-muted">Añade elementos nuevos y explora el historial de ventas operativas.</p>
       </div>
       <AppButton variant="primary" size="large" prepend-icon="mdi-plus" @click="isModalOpen = true">
