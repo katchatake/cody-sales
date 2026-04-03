@@ -27,12 +27,12 @@ export class SaleController {
 
     if (milestones.length > 0) {
       // Get highest milestone if multiple were breached somehow
-      const maxMilestone = Math.max(...milestones);
-      const textGoal =
+      let maxMilestone = Math.max(...milestones);
+      let textGoal =
         maxMilestone === 100
           ? "¡Felicidades! Has alcanzado el 100% de tu meta."
           : `¡Felicidades! Has alcanzado el ${maxMilestone}% de tu meta.`;
-      res.setHeader("X-process-goal", textGoal);
+      res.setHeader("x-process-goal", textGoal);
     }
 
     res.status(201).json({ data: sale });

@@ -1,8 +1,10 @@
 <template>
-  <v-card class="shadow-lg rounded-xl pa-6 h-100 border-0 flex-grow-1" elevation="0">
-    <v-card-title class="font-weight-black px-0 pt-0 text-heading-md mb-4 text-heading">
-      {{ title }}
-    </v-card-title>
+  <AppCard class="flex-grow-1" padded="false">
+    <div class="pa-6 pb-0">
+      <h3 class="font-weight-black text-heading-md mb-4 text-heading">
+        {{ title }}
+      </h3>
+    </div>
     
     <v-table class="bg-transparent">
       <thead>
@@ -22,7 +24,7 @@
         </tr>
       </tbody>
     </v-table>
-  </v-card>
+  </AppCard>
 </template>
 
 <script setup lang="ts">

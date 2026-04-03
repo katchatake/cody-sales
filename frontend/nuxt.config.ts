@@ -12,6 +12,13 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
+
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false
+    }
+  ],
   
   modules: [
     '@pinia/nuxt',

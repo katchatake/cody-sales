@@ -2,12 +2,18 @@ import { UserRepository } from '../domain/UserRepository';
 import { User } from '../domain/User';
 import prisma from '../../../config/database';
 
+export enum Role {
+    ADMIN = 'ADMIN',
+    SUPERVISOR = 'SUPERVISOR',
+    PROMOTOR = 'PROMOTOR'
+}
+
 export class PrismaUserRepository implements UserRepository {
     async save(user: User): Promise<User> {
         const result = await prisma.user.create({
             data: {
                 email: user.email,
-                role: user.role,
+                role: user.role as Role,
                 name: user.name,
                 password: user.password || '',
             }

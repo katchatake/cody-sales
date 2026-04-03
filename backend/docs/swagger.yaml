@@ -102,6 +102,16 @@ paths:
         '200':
           description: Lista de Categorías de catálogo (Protegido por prohibición a Promotores)
 
+  /products:
+    get:
+      summary: Obtener el listado de productos
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Arreglo de todos los productos y sus categorias ligadas
+
   /goals:
     post:
       summary: Registrar una nueva Meta

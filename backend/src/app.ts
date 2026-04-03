@@ -11,7 +11,14 @@ const app: Application = express();
 const swaggerDocument = YAML.load(path.join(__dirname, "../docs/swagger.yaml"));
 
 // Middlewares
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["x-process-goal"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,6 +35,7 @@ import { catalogRoutes } from "./modules/catalog/infrastructure/CatalogRoutes";
 import { goalRoutes } from "./modules/goals/infrastructure/GoalRoutes";
 import { saleRoutes } from "./modules/sales/infrastructure/SaleRoutes";
 import { progressRoutes } from "./modules/progress/infrastructure/ProgressRoutes";
+import { productRoutes } from "./modules/products/infrastructure/ProductRoutes";
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
@@ -35,6 +43,7 @@ app.use("/api/v1/sales", saleRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/catalog", catalogRoutes);
 app.use("/api/v1/progress", progressRoutes);
+app.use("/api/v1/products", productRoutes);
 
 // Catch-all route for unknown paths
 app.use((req: Request, res: Response, next: NextFunction) => {

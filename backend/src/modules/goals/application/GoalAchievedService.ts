@@ -9,16 +9,16 @@ export class GoalAchievedService {
      */
     static async checkMilestones(promotorId: number, saleDate: Date): Promise<number[]> {
         const milestonesAchieved: number[] = [];
-        
+
         try {
             const month = saleDate.getMonth() + 1; // 1-12
             const year = saleDate.getFullYear();
 
             const repo = new PrismaProgressRepository();
             const progressUseCase = new GetMonthlyProgressByPromotorUseCase(repo);
-            
+
             const progress = await progressUseCase.execute(promotorId, month, year);
-            if (!progress) return milestonesAchieved; 
+            if (!progress) return milestonesAchieved;
 
             const nuevoProgreso = progress.percentage;
             const hitos = [50, 80, 100];
@@ -28,7 +28,7 @@ export class GoalAchievedService {
 
             for (const umbral of hitos) {
                 if (nuevoProgreso >= umbral) {
-                    
+
                     // ¿Ya tiene registrado este string "50" en este mes?
                     const existing = await prisma.goalAchieved.findFirst({
                         where: {

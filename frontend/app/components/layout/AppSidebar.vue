@@ -10,7 +10,7 @@
     </div>
 
     <v-list class="px-4 mt-2">
-      <v-list-item v-for="(item, i) in items" :key="i" :value="item" :to="item.to" active-color="brand-primary"
+      <v-list-item v-for="(item, i) in items" :key="i" :value="item" :to="item.to" color="brand-primary"
         class="mb-2 rounded-xl" link>
         <template v-slot:prepend>
           <v-icon :icon="item.icon" class="me-3"></v-icon>

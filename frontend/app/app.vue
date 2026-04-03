@@ -1,8 +1,15 @@
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <div>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+    <Toaster position="top-right" richColors closeButton />
+  </div>
 </template>
+
+<script setup lang="ts">
+import { Toaster } from 'vue-sonner';
+</script>
 
 <style>
 /* Estilos en global.scss */

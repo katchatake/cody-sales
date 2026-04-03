@@ -6,37 +6,30 @@
     <!-- Activity Row -->
     <v-row class="mt-6">
       <v-col cols="12" lg="4">
-        <BaseTableCard 
-          title="Ventas Recientes" 
-          :headers="['ID Venta', 'Fecha', 'Monto', 'Estado', '']" 
-          :items="recentActivity"
-        >
+        <BaseTableCard title="Ventas Recientes" :headers="['Fecha', 'Monto', 'Estado']" :items="recentActivity">
           <template #row="{ item }">
-            <td class="text-heading-sm font-weight-bold">{{ item.id }}</td>
             <td class="text-muted font-weight-medium">{{ item.date }}</td>
             <td class="font-weight-black">${{ item.amount }}</td>
             <td>
-              <v-chip :color="item.statusColor" size="small" variant="flat" class="font-weight-bold text-uppercase px-3">
+              <v-chip :color="item.statusColor" size="small" variant="flat"
+                class="font-weight-bold text-uppercase px-3">
                 {{ item.status }}
               </v-chip>
             </td>
             <td class="text-right">
-              <v-btn icon="mdi-dots-vertical" variant="text" size="small" color="grey-darken-1"></v-btn>
+              <AppButton variant="ghost" icon="mdi-dots-vertical" />
             </td>
           </template>
         </BaseTableCard>
       </v-col>
       <v-col cols="12" lg="4">
-        <BaseTableCard 
-          title="Reconocimientos" 
-          :headers="['Fecha', 'Monto', 'Estado']" 
-          :items="progress"
-        >
+        <BaseTableCard title="Reconocimientos" :headers="['Fecha', 'Monto', 'Estado']" :items="progress">
           <template #row="{ item }">
             <td class="text-muted font-weight-medium">{{ item.date }}</td>
             <td class="font-weight-black">${{ item.amount }}</td>
             <td>
-              <v-chip :color="item.statusColor" size="small" variant="flat" class="font-weight-bold text-uppercase px-3">
+              <v-chip :color="item.statusColor" size="small" variant="flat"
+                class="font-weight-bold text-uppercase px-3">
                 {{ item.status }}
               </v-chip>
             </td>
@@ -44,21 +37,15 @@
         </BaseTableCard>
       </v-col>
       <v-col cols="12" lg="4">
-        <v-card
-          class="shadow-lg rounded-xl pa-8 h-100 border-0 d-flex flex-column justify-center align-center text-center banner-card"
-          elevation="0">
+        <AppCard variant="gradient" class="d-flex flex-column justify-center align-center text-center">
           <v-avatar size="90" class="mb-5 shadow-base bg-surface-base">
             <v-icon color="brand-primary" size="48">mdi-rocket-launch</v-icon>
           </v-avatar>
-          <h3 class="text-heading-lg mb-3 text-surface-base">¡Excelente!</h3>
-          <p class="text-body-md mb-8 text-surface-base opacity-90">Las ventas esta semana han superado la meta esperada
-            por
-            un 24%.</p>
-          <v-btn color="surface-base" variant="elevated" size="large"
-            class="text-brand-primary font-weight-bold shadow-base" rounded="pill" block>
-            Ver Reporte Completo
-          </v-btn>
-        </v-card>
+          <h3 class="text-heading-lg mb-3">¡Excelente!</h3>
+          <p class="text-body-md mb-8 opacity-90">
+            Las ventas esta semana han superado la meta esperada por un 24%.
+          </p>
+        </AppCard>
       </v-col>
     </v-row>
   </div>
@@ -110,11 +97,7 @@ const progress = ref([
 }
 
 .hover-bg:hover {
-  background-color: #f8fafc !important;
-}
-
-.banner-card {
-  background: linear-gradient(135deg, #60a5fa 0%, #1e3a8a 100%);
+  background-color: var(--v-theme-surface-elevated) !important;
 }
 
 .opacity-90 {

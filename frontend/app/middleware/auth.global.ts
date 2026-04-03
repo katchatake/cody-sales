@@ -1,26 +1,25 @@
-import { defineNuxtRouteMiddleware, navigateTo, useCookie } from '#imports';
+import { defineNuxtRouteMiddleware, navigateTo } from '#imports';
 import { useAuthStore } from '../stores/auth';
 
-export default defineNuxtRouteMiddleware((to, from) => {
-  // En SSR y Cliente, accedemos a la cookie del token directamente
-  const token = useCookie('jwt_token');
+export default defineNuxtRouteMiddleware((to) => {
   const authStore = useAuthStore();
+  const isAuthRoute = to.path === '/login';
 
-  // Siempre intentamos restaurar sesion si hay token (útil al recargar)
-  if (token.value && !authStore.isAuthenticated) {
+  if (!import.meta.client) {
+    return;
+  }
+
+  if (!authStore.isAuthenticated) {
     authStore.restoreSession();
   }
 
-  // Las páginas públicas (o de login) 
-  const isAuthRoute = to.path === '/login';
+  const token = localStorage.getItem('auth_token');
 
-  // Si trata de entrar a rutas privadas sin token
-  if (!token.value && !isAuthRoute) {
+  if (!token && !isAuthRoute) {
     return navigateTo('/login');
   }
 
-  // Si trata de entrar a la pestaña login con un token activo
-  if (token.value && isAuthRoute) {
+  if (token && isAuthRoute) {
     return navigateTo('/');
   }
 });
