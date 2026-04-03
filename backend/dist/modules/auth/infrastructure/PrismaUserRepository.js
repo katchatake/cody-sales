@@ -3,9 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PrismaUserRepository = void 0;
+exports.PrismaUserRepository = exports.Role = void 0;
 const User_1 = require("../domain/User");
 const database_1 = __importDefault(require("../../../config/database"));
+var Role;
+(function (Role) {
+    Role["ADMIN"] = "ADMIN";
+    Role["SUPERVISOR"] = "SUPERVISOR";
+    Role["PROMOTOR"] = "PROMOTOR";
+})(Role || (exports.Role = Role = {}));
 class PrismaUserRepository {
     async save(user) {
         const result = await database_1.default.user.create({

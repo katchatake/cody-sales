@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const createSaleSchema = Joi.object({
+const saleItemSchema = Joi.object({
   productId: Joi.number().integer().required().messages({
     "number.base": "productId debe ser un número",
     "any.required": "productId es requerido"
@@ -14,5 +14,13 @@ export const createSaleSchema = Joi.object({
     "number.base": "total debe ser un número",
     "number.positive": "total debe ser mayor a 0",
     "any.required": "total es requerido"
+  })
+});
+
+export const createSaleSchema = Joi.object({
+  items: Joi.array().items(saleItemSchema).min(1).required().messages({
+    "array.base": "items debe ser un arreglo",
+    "array.min": "Debes registrar al menos un producto",
+    "any.required": "items es requerido"
   })
 });

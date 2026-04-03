@@ -19,6 +19,18 @@ class PrismaSaleRepository {
         });
         return new Sale_1.Sale(result.id, result.promotorId, result.productId, result.quantity, result.total, result.saleDate, result.createdAt, result.product);
     }
+    async saveMany(sales) {
+        const results = await database_1.default.$transaction(sales.map((sale) => database_1.default.sale.create({
+            data: {
+                promotorId: sale.promotorId,
+                productId: sale.productId,
+                quantity: sale.quantity,
+                total: sale.total
+            },
+            include: { product: true }
+        })));
+        return results.map((result) => new Sale_1.Sale(result.id, result.promotorId, result.productId, result.quantity, result.total, result.saleDate, result.createdAt, result.product));
+    }
     async findAll() {
         const rows = await database_1.default.sale.findMany({
             orderBy: { createdAt: "desc" },

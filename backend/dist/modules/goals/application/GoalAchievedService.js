@@ -13,7 +13,7 @@ class GoalAchievedService {
      * Retorna un arreglo numérico con los hitos consolidados recién ganados (ej: [50]).
      */
     static async checkMilestones(promotorId, saleDate) {
-        let milestonesAchieved = [];
+        const milestonesAchieved = [];
         try {
             const month = saleDate.getMonth() + 1; // 1-12
             const year = saleDate.getFullYear();

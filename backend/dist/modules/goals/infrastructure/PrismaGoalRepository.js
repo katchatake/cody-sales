@@ -20,9 +20,19 @@ class PrismaGoalRepository {
     }
     async findAll() {
         const rows = await database_1.default.goal.findMany({
-            orderBy: { createdAt: "desc" }
+            orderBy: { createdAt: "desc" },
+            include: {
+                promotor: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true
+                    }
+                }
+            }
         });
-        return rows.map((row) => new Goal_1.Goal(row.id, row.promotorId, row.target, row.month, row.year, row.createdAt, row.updatedAt));
+        return rows.map((row) => new Goal_1.Goal(row.id, row.promotorId, row.target, row.month, row.year, row.createdAt, row.updatedAt, row.promotor));
     }
     async findByPromotorMonthAndYear(promotorId, month, year) {
         const row = await database_1.default.goal.findFirst({

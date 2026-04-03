@@ -12,17 +12,36 @@ export class PrismaGoalRepository implements GoalRepository {
                 year: goal.year
             }
         });
-        
+
         return new Goal(result.id, result.promotorId, result.target, result.month, result.year, result.createdAt, result.updatedAt);
     }
 
     async findAll(): Promise<Goal[]> {
         const rows = await prisma.goal.findMany({
-            orderBy: { createdAt: "desc" }
+            orderBy: { createdAt: "desc" },
+            include: {
+                promotor: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true
+                    }
+                }
+            }
         });
-        
-        return rows.map((row: any) => 
-            new Goal(row.id, row.promotorId, row.target, row.month, row.year, row.createdAt, row.updatedAt)
+
+        return rows.map((row: any) =>
+            new Goal(
+                row.id,
+                row.promotorId,
+                row.target,
+                row.month,
+                row.year,
+                row.createdAt,
+                row.updatedAt,
+                row.promotor
+            )
         );
     }
 

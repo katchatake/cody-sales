@@ -8,8 +8,8 @@ class CreateSaleUseCase {
         this.saleRepository = saleRepository;
     }
     async execute(data) {
-        const sale = new Sale_1.Sale(null, data.promotorId, data.productId, data.quantity, data.total);
-        return this.saleRepository.save(sale);
+        const sales = data.map((item) => new Sale_1.Sale(null, item.promotorId, item.productId, item.quantity, item.total));
+        return this.saleRepository.saveMany(sales);
     }
 }
 exports.CreateSaleUseCase = CreateSaleUseCase;

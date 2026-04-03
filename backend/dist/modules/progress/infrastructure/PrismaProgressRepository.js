@@ -9,7 +9,13 @@ const database_1 = __importDefault(require("../../../config/database"));
 class PrismaProgressRepository {
     async getMonthlyProgress(month, year) {
         const goals = await database_1.default.goal.findMany({
-            where: { month, year },
+            where: {
+                month,
+                year,
+                promotor: {
+                    role: "PROMOTOR"
+                }
+            },
             include: { promotor: true }
         });
         // month is 1-indexed for the user, 0-indexed in JS Date
@@ -35,7 +41,14 @@ class PrismaProgressRepository {
     }
     async getMonthlyProgressByPromotorId(promotorId, month, year) {
         const goal = await database_1.default.goal.findFirst({
-            where: { promotorId, month, year },
+            where: {
+                promotorId,
+                month,
+                year,
+                promotor: {
+                    role: "PROMOTOR"
+                }
+            },
             include: { promotor: true }
         });
         if (!goal)

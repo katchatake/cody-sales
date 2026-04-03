@@ -1,3 +1,11 @@
+export interface GoalPromotor {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  createdAt?: string;
+}
+
 export interface GoalItem {
   id: number;
   promotorId: number;
@@ -6,6 +14,7 @@ export interface GoalItem {
   year: number;
   createdAt?: string;
   updatedAt?: string;
+  promotor?: GoalPromotor;
 }
 
 export interface GoalPayload {

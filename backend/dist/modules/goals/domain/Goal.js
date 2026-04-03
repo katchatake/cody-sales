@@ -9,7 +9,8 @@ class Goal {
     year;
     createdAt;
     updatedAt;
-    constructor(id, promotorId, target, month, year, createdAt, updatedAt) {
+    promotor;
+    constructor(id, promotorId, target, month, year, createdAt, updatedAt, promotor) {
         this.id = id;
         this.promotorId = promotorId;
         this.target = target;
@@ -17,6 +18,7 @@ class Goal {
         this.year = year;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.promotor = promotor;
     }
 }
 exports.Goal = Goal;

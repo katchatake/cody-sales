@@ -15,45 +15,21 @@
           <h2 class="text-heading-lg mb-6">Asignar Nueva Meta</h2>
 
           <v-form @submit.prevent="submitGoal" :disabled="isSubmitting">
-            <AppInput
-              v-model.number="goalForm.promotorId"
-              type="number"
-              min="1"
-              label="ID del Promotor"
-              icon="mdi-account-outline"
-              class="mb-3"
-            />
+            <v-select v-model="goalForm.promotorId" :items="promotors" item-title="name" item-value="id"
+              label="Promotor" prepend-inner-icon="mdi-account-outline" variant="outlined" rounded="xl" class="mb-3">
+              <template #item="{ props, item }">
+                <v-list-item v-bind="props" :subtitle="item.name" />
+              </template>
+            </v-select>
 
-            <AppInput
-              v-model.number="goalForm.target"
-              type="number"
-              min="1"
-              step="0.01"
-              label="Meta de Venta"
-              icon="mdi-currency-usd"
-              class="mb-3"
-            />
+            <AppInput v-model.number="goalForm.target" type="number" min="1" step="0.01" label="Meta de Venta"
+              icon="mdi-currency-usd" class="mb-3" />
 
-            <v-select
-              v-model="goalForm.month"
-              :items="monthOptions"
-              item-title="label"
-              item-value="value"
-              label="Mes"
-              prepend-inner-icon="mdi-calendar-month-outline"
-              variant="outlined"
-              rounded="xl"
-              class="mb-3"
-            />
+            <v-select v-model="goalForm.month" :items="monthOptions" item-title="label" item-value="value" label="Mes"
+              prepend-inner-icon="mdi-calendar-month-outline" variant="outlined" rounded="xl" class="mb-3" />
 
-            <AppInput
-              v-model.number="goalForm.year"
-              type="number"
-              min="2024"
-              label="Año"
-              icon="mdi-calendar-range"
-              class="mb-6"
-            />
+            <AppInput v-model.number="goalForm.year" type="number" min="2024" label="Año" icon="mdi-calendar-range"
+              class="mb-6" />
 
             <div class="d-flex justify-end" style="gap: 16px;">
               <AppButton variant="ghost" @click="resetForm" :disabled="isSubmitting">
@@ -68,14 +44,10 @@
       </v-col>
 
       <v-col cols="12" lg="7">
-        <BaseTableCard
-          title="Metas Registradas"
-          :headers="['ID', 'Promotor', 'Meta', 'Mes', 'Año']"
-          :items="goals"
-        >
+        <BaseTableCard title="Metas Registradas" :headers="['ID', 'Promotor', 'Meta', 'Mes', 'Año']" :items="goals">
           <template #row="{ item }">
             <td class="font-weight-bold">#{{ item.id }}</td>
-            <td>{{ item.promotorId }}</td>
+            <td>{{ item.promotor.name }}</td>
             <td class="font-weight-black text-brand-primary">{{ formatCurrency(item.target) }}</td>
             <td>{{ monthName(item.month) }}</td>
             <td>{{ item.year }}</td>
@@ -91,7 +63,7 @@ import { onMounted, ref } from 'vue';
 import { navigateTo, useNuxtApp } from '#imports';
 import { toast } from 'vue-sonner';
 import { useAuthStore } from '../../stores/auth';
-import type { GoalItem, GoalPayload } from '../../types/goals';
+import type { GoalItem, GoalPayload, GoalPromotor } from '../../types/goals';
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();
@@ -120,6 +92,7 @@ const defaultForm: GoalPayload = {
 };
 
 const goals = ref<GoalItem[]>([]);
+const promotors = ref<GoalPromotor[]>([]);
 const isSubmitting = ref(false);
 const goalForm = ref<GoalPayload>({ ...defaultForm });
 
@@ -143,6 +116,15 @@ const loadGoals = async () => {
     goals.value = response.data?.data ?? [];
   } catch (err) {
     toast.error('No se pudieron cargar las metas registradas');
+  }
+};
+
+const loadPromotors = async () => {
+  try {
+    const response = await $api.get('/users/promotors');
+    promotors.value = response.data?.data ?? [];
+  } catch (err) {
+    toast.error('No se pudieron cargar los promotores');
   }
 };
 
@@ -188,5 +170,6 @@ onMounted(() => {
   }
 
   loadGoals();
+  loadPromotors();
 });
 </script>

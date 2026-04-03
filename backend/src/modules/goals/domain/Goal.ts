@@ -6,6 +6,12 @@ export class Goal {
         public readonly month: number,
         public readonly year: number,
         public readonly createdAt?: Date,
-        public readonly updatedAt?: Date
+        public readonly updatedAt?: Date,
+        public readonly promotor?: {
+            id: number;
+            name: string;
+            email: string;
+            role: string;
+        }
     ) {}
 }

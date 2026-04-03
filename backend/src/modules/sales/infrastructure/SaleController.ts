@@ -5,37 +5,36 @@ import { GoalAchievedService } from "../../goals/application/GoalAchievedService
 
 export class SaleController {
   async createSale(req: Request, res: Response): Promise<void> {
-    const { productId, quantity, total } = req.body;
-    // Extract promotor from JWT
+    const { items } = req.body;
     const promotorId = (req as any).user.id;
 
     const repository = new PrismaSaleRepository();
     const useCase = new CreateSaleUseCase(repository);
 
-    const sale = await useCase.execute({
-      promotorId,
-      productId,
-      quantity,
-      total,
-    });
+    const sales = await useCase.execute(
+      items.map((item: { productId: number; quantity: number; total: number }) => ({
+        promotorId,
+        productId: item.productId,
+        quantity: item.quantity,
+        total: item.total,
+      })),
+    );
 
-    // Cross DB Execution immediately to answer the Client Request Header
     const milestones = await GoalAchievedService.checkMilestones(
-      sale.promotorId,
-      sale.saleDate || new Date(),
+      promotorId,
+      sales[sales.length - 1]?.saleDate || new Date(),
     );
 
     if (milestones.length > 0) {
-      // Get highest milestone if multiple were breached somehow
-      let maxMilestone = Math.max(...milestones);
-      let textGoal =
+      const maxMilestone = Math.max(...milestones);
+      const textGoal =
         maxMilestone === 100
           ? "¡Felicidades! Has alcanzado el 100% de tu meta."
           : `¡Felicidades! Has alcanzado el ${maxMilestone}% de tu meta.`;
       res.setHeader("x-process-goal", textGoal);
     }
 
-    res.status(201).json({ data: sale });
+    res.status(201).json({ data: sales });
   }
 
   async getSales(req: Request, res: Response): Promise<void> {

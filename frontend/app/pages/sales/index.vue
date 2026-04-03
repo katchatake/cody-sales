@@ -3,54 +3,89 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-heading-xl text-heading mb-1">Ventas</h1>
-        <p class="text-body-md text-muted">Añade elementos nuevos y explora el historial de ventas operativas.</p>
+        <p class="text-body-md text-muted">
+          Añade elementos nuevos y explora el historial de ventas operativas.
+        </p>
       </div>
       <AppButton variant="primary" size="large" prepend-icon="mdi-plus" @click="isModalOpen = true">
         Registrar Venta
       </AppButton>
     </div>
 
-    <!-- Historial Table -->
     <BaseTableCard title="Explorador de Transacciones"
       :headers="['ID', 'Producto', 'Fecha Operación', 'Cantidad', 'Importe ($)']" :items="salesHistory">
       <template #row="{ item }">
         <td class="font-weight-bold">#{{ item.id }}</td>
-        <td class="text-subtitle-1">{{ getProductName(item.productId) || item.product?.name || `Product ID:
-          ${item.productId}` }}</td>
+        <td class="text-subtitle-1">
+          {{ getProductName(item.productId) || item.product?.name || `Product ID: ${item.productId}` }}
+        </td>
         <td class="text-muted">{{ formatDate(item.saleDate || item.createdAt) }}</td>
         <td class="font-weight-medium text-center">{{ item.quantity }}</td>
-        <td class="font-weight-black text-success-base">${{ item.total }}</td>
+        <td class="font-weight-black text-success-base">{{ formatCurrency(item.total) }}</td>
       </template>
     </BaseTableCard>
 
-    <!-- Modal Registro -->
-    <v-dialog v-model="isModalOpen" max-width="550" persistent>
+    <v-dialog v-model="isModalOpen" max-width="760" persistent>
       <AppCard variant="info" padded="large">
         <div class="d-flex align-center justify-space-between mb-6">
-          <h2 class="text-heading-lg">Registrar Nueva Venta</h2>
-          <v-btn icon="mdi-close" variant="text" @click="closeModal" density="comfortable"
-            color="grey-darken-1"></v-btn>
+          <div>
+            <h2 class="text-heading-lg mb-1">Registrar Nueva Venta</h2>
+            <p class="text-body-sm text-muted mb-0">
+              Puedes agregar varios productos dentro de un solo registro.
+            </p>
+          </div>
+          <v-btn icon="mdi-close" variant="text" @click="closeModal" density="comfortable" color="grey-darken-1" />
         </div>
 
         <v-form @submit.prevent="submitSale" :disabled="isSubmitting">
-          <!-- Dropdown the Catálogo -->
-          <v-select v-model="saleForm.productId" :items="products" item-title="name" item-value="id"
-            label="Selecciona un Producto" prepend-inner-icon="mdi-package-variant-closed" class="mb-2" required
-            :rules="[v => !!v || 'Debes seleccionar un producto válido']" @update:modelValue="calculateTotal"
-            variant="outlined" rounded="xl"></v-select>
+          <div class="d-flex flex-column sales-lines">
+            <div v-for="(item, index) in saleItems" :key="index" class="sales-line">
+              <div class="d-flex align-center justify-space-between mb-4">
+                <div class="text-subtitle-1 font-weight-bold">
+                  Producto {{ index + 1 }}
+                </div>
+                <AppButton v-if="saleItems.length > 1" variant="ghost" icon="mdi-delete-outline"
+                  @click="removeSaleItem(index)" />
+              </div>
 
-          <!-- Input Cantidad -->
-          <AppInput v-model.number="saleForm.quantity" type="number" min="1" label="Cantidad" icon="mdi-numeric"
-            class="mb-2" required :rules="[v => v > 0 || 'Debes ingresar una cantidad válida']"
-            @input="calculateTotal" />
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-select v-model="item.productId" :items="products" item-title="name" item-value="id"
+                    label="Selecciona un Producto" prepend-inner-icon="mdi-package-variant-closed" required
+                    :rules="[v => !!v || 'Debes seleccionar un producto válido']"
+                    @update:modelValue="calculateLineTotal(index)" variant="outlined" rounded="xl" />
+                </v-col>
 
-          <!-- Total a Inyectar -->
-          <AppInput v-model.number="saleForm.total" type="number" step="0.01" label="Monto Total a Cobrar $"
-            icon="mdi-currency-usd" class="mb-6" required :rules="[v => v > 0 || 'El total debe ser positivo']" />
+                <v-col cols="12" md="3">
+                  <AppInput v-model.number="item.quantity" type="number" min="1" label="Cantidad" required
+                    :rules="[v => v > 0 || 'Debes ingresar una cantidad válida']" @input="calculateLineTotal(index)" />
+                </v-col>
 
-          <div class="d-flex justify-end gap-3" style="gap: 16px;">
+                <v-col cols="12" md="3">
+                  <AppInput v-model.number="item.total" type="number" step="0.01" min="0" label="Monto Total"
+                    icon="mdi-currency-usd" required :rules="[v => v > 0 || 'El total debe ser positivo']" />
+                </v-col>
+              </v-row>
+            </div>
+          </div>
+
+          <div class="d-flex align-center justify-space-between mt-6 mb-4 flex-wrap" style="gap: 16px;">
+            <AppButton variant="ghost" prepend-icon="mdi-plus" @click="addSaleItem">
+              Agregar Producto
+            </AppButton>
+
+            <div class="text-right">
+              <div class="text-body-sm text-muted">Total acumulado</div>
+              <div class="text-heading-md font-weight-black">
+                {{ formatCurrency(grandTotal) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-end" style="gap: 16px;">
             <AppButton variant="ghost" @click="closeModal" :disabled="isSubmitting">Cancelar</AppButton>
-            <AppButton type="submit" variant="primary" :loading="isSubmitting" prepend-icon="mdi-check">Confirmar Compra
+            <AppButton type="submit" variant="primary" :loading="isSubmitting" prepend-icon="mdi-check">
+              Confirmar Compra
             </AppButton>
           </div>
         </v-form>
@@ -60,34 +95,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useNuxtApp } from '#imports';
 import { toast } from 'vue-sonner';
 import { useAuthStore } from '../../stores/auth';
-import type { Product, SalePayload, SaleHistoryItem } from '../../types/sales';
+import type { CreateSalesPayload, Product, SaleHistoryItem, SalePayload } from '../../types/sales';
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();
 
 const isModalOpen = ref(false);
 const isSubmitting = ref(false);
-
 const products = ref<Product[]>([]);
 const salesHistory = ref<SaleHistoryItem[]>([]);
 
-const defaultForm: SalePayload = {
-  productId: null as any,
+const createEmptySaleItem = (): SalePayload => ({
+  productId: null,
   quantity: 1,
-  total: 0
-};
+  total: 0,
+});
 
-const saleForm = ref<SalePayload>({ ...defaultForm });
+const saleItems = ref<SalePayload[]>([createEmptySaleItem()]);
+
+const grandTotal = computed(() =>
+  saleItems.value.reduce((sum, item) => sum + (Number(item.total) || 0), 0),
+);
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 2,
+  }).format(value);
 
 const loadProducts = async () => {
   try {
     const res = await $api.get('/products');
     products.value = res.data?.data || res.data || [];
-  } catch (err) {
+  } catch {
     toast.error('Error al sincronizar base de productos disponibles');
   }
 };
@@ -103,60 +148,87 @@ const loadSales = async () => {
   try {
     const res = await $api.get(`/sales/${userId}`);
     salesHistory.value = res.data?.data || res.data || [];
-  } catch (err) {
+  } catch {
     toast.error('No se pudo descargar el registro de ventas históricas');
   }
 };
 
 const getProductName = (id: number): string | null => {
-  const match = products.value.find(p => p.id === id);
+  const match = products.value.find((product) => product.id === id);
   return match ? match.name : null;
 };
 
 const formatDate = (dateStr?: string) => {
   if (!dateStr) return 'N/a';
-  return new Date(dateStr).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  return new Date(dateStr).toLocaleDateString('es-MX', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
-// Auto-fill total strictly si el modelo del backend expone un precio local. Si no, lo dejamos libre.
-const calculateTotal = () => {
-  if (!saleForm.value.productId) return;
-  const match = products.value.find(p => p.id === saleForm.value.productId);
+const calculateLineTotal = (index: number) => {
+  const currentItem = saleItems.value[index];
 
-  if (match && match.price && saleForm.value.quantity) {
-    saleForm.value.total = match.price * saleForm.value.quantity;
+  if (!currentItem?.productId) {
+    return;
   }
+
+  const match = products.value.find((product) => product.id === currentItem.productId);
+
+  if (match && currentItem.quantity) {
+    currentItem.total = match.price * currentItem.quantity;
+  }
+};
+
+const addSaleItem = () => {
+  saleItems.value.push(createEmptySaleItem());
+};
+
+const removeSaleItem = (index: number) => {
+  saleItems.value.splice(index, 1);
+};
+
+const resetForm = () => {
+  saleItems.value = [createEmptySaleItem()];
 };
 
 const closeModal = () => {
   isModalOpen.value = false;
-  saleForm.value = { ...defaultForm };
+  resetForm();
 };
 
 const submitSale = async () => {
-  if (!saleForm.value.productId || saleForm.value.quantity < 1 || saleForm.value.total <= 0) {
-    toast.error("Por favor completa los campos correctamente");
+  const hasInvalidItem = saleItems.value.some(
+    (item) => !item.productId || item.quantity < 1 || item.total <= 0,
+  );
+
+  if (hasInvalidItem) {
+    toast.error('Por favor completa correctamente todos los productos');
     return;
   }
 
   isSubmitting.value = true;
+
   try {
-    const apiPayload = {
-      productId: Number(saleForm.value.productId),
-      quantity: Number(saleForm.value.quantity),
-      total: Number(saleForm.value.total)
+    const apiPayload: CreateSalesPayload = {
+      items: saleItems.value.map((item) => ({
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        total: Number(item.total),
+      })),
     };
 
     const res = await $api.post('/sales', apiPayload);
 
-    console.log(res);
-    console.log(res.headers['x-process-goal']);
-    // Si la venta destraba el logro / milestone emitido en el encabezado
     if (res.headers && res.headers['x-process-goal']) {
       toast.info(res.headers['x-process-goal']);
     }
 
-    toast.success('Validado con éxito y registrado.');
+    toast.success('Ventas registradas correctamente.');
     closeModal();
     loadSales();
   } catch (err: any) {
@@ -172,3 +244,16 @@ onMounted(() => {
   loadSales();
 });
 </script>
+
+<style scoped>
+.sales-lines {
+  gap: 16px;
+}
+
+.sales-line {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.55);
+}
+</style>

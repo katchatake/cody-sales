@@ -6,9 +6,17 @@ export interface Product {
 }
 
 export interface SalePayload {
-  productId: number;
+  productId: number | null;
   quantity: number;
   total: number;
+}
+
+export interface CreateSalesPayload {
+  items: Array<{
+    productId: number;
+    quantity: number;
+    total: number;
+  }>;
 }
 
 export interface SaleHistoryItem {
@@ -17,5 +25,6 @@ export interface SaleHistoryItem {
   quantity: number;
   total: number;
   saleDate: string;
+  createdAt?: string;
   product?: Product;
 }

@@ -1,23 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
-const CreateUserUseCase_1 = require("../application/CreateUserUseCase");
-const MysqlUserRepository_1 = require("./MysqlUserRepository");
+const GetPromotorsUseCase_1 = require("../application/GetPromotorsUseCase");
+const PrismaUserSummaryRepository_1 = require("./PrismaUserSummaryRepository");
 class UserController {
-    constructor() { }
-    async createUser(req, res) {
-        try {
-            const { name, email, role } = req.body;
-            // Initialization here is for demonstration. 
-            // In a real app we would use Dependency Injection.
-            const repository = new MysqlUserRepository_1.MysqlUserRepository();
-            const useCase = new CreateUserUseCase_1.CreateUserUseCase(repository);
-            const user = await useCase.execute({ name, email, role });
-            res.status(201).json(user);
-        }
-        catch (error) {
-            res.status(400).json({ error: error.message });
-        }
+    async getPromotors(req, res) {
+        const repository = new PrismaUserSummaryRepository_1.PrismaUserSummaryRepository();
+        const useCase = new GetPromotorsUseCase_1.GetPromotorsUseCase(repository);
+        const promotors = await useCase.execute();
+        res.status(200).json({ data: promotors });
     }
 }
 exports.UserController = UserController;

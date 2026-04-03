@@ -35,6 +35,7 @@ import { catalogRoutes } from "./modules/catalog/infrastructure/CatalogRoutes";
 import { goalRoutes } from "./modules/goals/infrastructure/GoalRoutes";
 import { saleRoutes } from "./modules/sales/infrastructure/SaleRoutes";
 import { progressRoutes } from "./modules/progress/infrastructure/ProgressRoutes";
+import { userRoutes } from "./modules/users/infrastructure/UserRoutes";
 import { productRoutes } from "./modules/products/infrastructure/ProductRoutes";
 
 // Routes
@@ -43,6 +44,7 @@ app.use("/api/v1/sales", saleRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/catalog", catalogRoutes);
 app.use("/api/v1/progress", progressRoutes);
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
 
 // Catch-all route for unknown paths

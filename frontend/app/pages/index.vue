@@ -1,106 +1,201 @@
 <template>
   <div>
-    <h1 class="text-heading-xl mb-2 text-left">Dashboard</h1>
-    <p class="text-body-lg text-muted mb-8">Resumen de las métricas principales de Cody Sales.</p>
+    <template v-if="!hydrated">
+      <h1 class="text-heading-xl mb-2 text-left">Dashboard</h1>
+      <p class="text-body-lg text-muted mb-8">
+        Cargando resumen...
+      </p>
+    </template>
 
-    <!-- Activity Row -->
-    <v-row class="mt-6">
-      <v-col cols="12" lg="4">
-        <BaseTableCard title="Ventas Recientes" :headers="['Fecha', 'Monto', 'Estado']" :items="recentActivity">
-          <template #row="{ item }">
-            <td class="text-muted font-weight-medium">{{ item.date }}</td>
-            <td class="font-weight-black">${{ item.amount }}</td>
-            <td>
-              <v-chip :color="item.statusColor" size="small" variant="flat"
-                class="font-weight-bold text-uppercase px-3">
-                {{ item.status }}
-              </v-chip>
-            </td>
-            <td class="text-right">
-              <AppButton variant="ghost" icon="mdi-dots-vertical" />
-            </td>
-          </template>
-        </BaseTableCard>
-      </v-col>
-      <v-col cols="12" lg="4">
-        <BaseTableCard title="Reconocimientos" :headers="['Fecha', 'Monto', 'Estado']" :items="progress">
-          <template #row="{ item }">
-            <td class="text-muted font-weight-medium">{{ item.date }}</td>
-            <td class="font-weight-black">${{ item.amount }}</td>
-            <td>
-              <v-chip :color="item.statusColor" size="small" variant="flat"
-                class="font-weight-bold text-uppercase px-3">
-                {{ item.status }}
-              </v-chip>
-            </td>
-          </template>
-        </BaseTableCard>
-      </v-col>
-      <v-col cols="12" lg="4">
-        <AppCard variant="gradient" class="d-flex flex-column justify-center align-center text-center">
-          <v-avatar size="90" class="mb-5 shadow-base bg-surface-base">
-            <v-icon color="brand-primary" size="48">mdi-rocket-launch</v-icon>
-          </v-avatar>
-          <h3 class="text-heading-lg mb-3">¡Excelente!</h3>
-          <p class="text-body-md mb-8 opacity-90">
-            Las ventas esta semana han superado la meta esperada por un 24%.
-          </p>
-        </AppCard>
-      </v-col>
-    </v-row>
+    <template v-else-if="isPromotor">
+      <h1 class="text-heading-xl mb-2 text-left">Dashboard</h1>
+      <p class="text-body-lg text-muted mb-8">
+        Resumen de las métricas principales de Cody Sales.
+      </p>
+
+      <ProgressSnapshotRow class="mt-6" :progress="progress" sold-label="Ventas del Mes" target-label="Meta actual:">
+        <template #third-card>
+          <AppCard>
+            <div class="text-overline text-muted mb-2">Ventas Registradas</div>
+            <div class="text-heading-xl font-weight-black mb-1">
+              {{ salesHistory.length }}
+            </div>
+            <div class="text-body-sm text-muted">
+              Operaciones encontradas para el usuario autenticado.
+            </div>
+          </AppCard>
+        </template>
+      </ProgressSnapshotRow>
+
+      <v-row class="mt-2">
+        <v-col cols="12" lg="7">
+          <BaseTableCard
+            title="Ventas Recientes"
+            :headers="['ID', 'Producto', 'Fecha', 'Cantidad', 'Importe']"
+            :items="salesHistory"
+          >
+            <template #row="{ item }">
+              <td class="font-weight-bold">#{{ item.id }}</td>
+              <td class="text-subtitle-1">
+                {{ item.product?.name || `Product ID: ${item.productId}` }}
+              </td>
+              <td class="text-muted">{{ formatDate(item.saleDate || item.createdAt) }}</td>
+              <td class="font-weight-medium text-center">{{ item.quantity }}</td>
+              <td class="font-weight-black text-success-base">{{ formatCurrency(item.total) }}</td>
+            </template>
+          </BaseTableCard>
+        </v-col>
+
+        <v-col cols="12" lg="5">
+          <ProgressAchievementsCard :progress="progress" />
+        </v-col>
+      </v-row>
+    </template>
+
+    <template v-else>
+      <h1 class="text-heading-xl mb-2 text-left">Dashboard de Equipo</h1>
+      <p class="text-body-lg text-muted mb-8">
+        Vista consolidada de ventas, promotores y avance general.
+      </p>
+
+      <TeamProgressOverview
+        class="mt-6"
+        :progress-items="teamProgressItems"
+        :promotors="promotors"
+        :sales-count-by-promotor="salesCountByPromotor"
+        :show-sales-count="true"
+        table-title="Progreso y Ventas por Promotor"
+      >
+        <template #third-card>
+          <AppCard>
+            <div class="text-overline text-muted mb-2">Ventas Totales</div>
+            <div class="text-heading-xl font-weight-black mb-1">
+              {{ allSales.length }}
+            </div>
+            <div class="text-body-sm text-muted">
+              Registros acumulados del equipo. Promotores activos: {{ promotors.length }}.
+            </div>
+          </AppCard>
+        </template>
+      </TeamProgressOverview>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useNuxtApp } from '#imports';
+import { toast } from 'vue-sonner';
+import { useAuthStore } from '../stores/auth';
+import type { ProgressItem } from '../types/progress';
+import type { SaleHistoryItem } from '../types/sales';
+import type { GoalPromotor } from '../types/goals';
 
-const fondoColor = (colorName: string) => {
-  // Helpers para forzar fondos en caso de fallar los lighten
-  const colors: Record<string, string> = {
-    primary: '#eff6ff', // bg-blue-50
-    secondary: '#f0f9ff',
-    info: '#f0fdf4',
-    warning: '#fffbeb'
-  };
-  return colors[colorName] || '#f3f4f6';
-}
+const { $api } = useNuxtApp();
+const authStore = useAuthStore();
 
-const recentActivity = ref([
-  { id: '#TRX-9481', date: '02 Abril 2026', amount: '250.00', status: 'Exitoso', statusColor: 'success-base' },
-  { id: '#TRX-9482', date: '02 Abril 2026', amount: '120.50', status: 'Pendiente', statusColor: 'warning-base' },
-  { id: '#TRX-9483', date: '01 Abril 2026', amount: '940.00', status: 'Exitoso', statusColor: 'success-base' },
-  { id: '#TRX-9484', date: '01 Abril 2026', amount: '45.00', status: 'Rechazado', statusColor: 'error-base' },
-  { id: '#TRX-9485', date: '31 Marzo 2026', amount: '530.25', status: 'Exitoso', statusColor: 'success-base' },
-]);
+const salesHistory = ref<SaleHistoryItem[]>([]);
+const allSales = ref<SaleHistoryItem[]>([]);
+const progress = ref<ProgressItem | null>(null);
+const teamProgressItems = ref<ProgressItem[]>([]);
+const promotors = ref<GoalPromotor[]>([]);
+const hydrated = ref(false);
 
-const progress = ref([
-  { date: '02 Abril 2026', amount: '250.00', status: 'Exitoso', statusColor: 'success-base' },
-  { date: '02 Abril 2026', amount: '120.50', status: 'Pendiente', statusColor: 'warning-base' },
-  { date: '01 Abril 2026', amount: '940.00', status: 'Exitoso', statusColor: 'success-base' },
-  { date: '01 Abril 2026', amount: '45.00', status: 'Rechazado', statusColor: 'error-base' },
-  { date: '31 Marzo 2026', amount: '530.25', status: 'Exitoso', statusColor: 'success-base' },
-]);
+const isPromotor = computed(() => authStore.user?.role?.toUpperCase() === 'PROMOTOR');
+const { formatCurrency } = useProgressHelpers();
+
+const salesCountByPromotor = computed<Record<number, number>>(() => {
+  return allSales.value.reduce<Record<number, number>>((acc, sale) => {
+    const promotorId = (sale as SaleHistoryItem & { promotorId?: number }).promotorId;
+    if (promotorId) {
+      acc[promotorId] = (acc[promotorId] || 0) + 1;
+    }
+    return acc;
+  }, {});
+});
+
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return 'N/a';
+
+  return new Date(dateStr).toLocaleDateString('es-MX', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const loadUserSales = async () => {
+  const userId = authStore.user?.id;
+
+  if (!userId) {
+    toast.error('No se encontró la sesión del usuario para cargar sus ventas');
+    return;
+  }
+
+  try {
+    const response = await $api.get(`/sales/${userId}`);
+    salesHistory.value = response.data?.data ?? [];
+  } catch {
+    toast.error('No se pudieron cargar las ventas del usuario');
+  }
+};
+
+const loadUserProgress = async () => {
+  const userId = authStore.user?.id;
+
+  if (!userId) {
+    return;
+  }
+
+  try {
+    const response = await $api.get(`/progress/${userId}`);
+    progress.value = response.data?.data ?? null;
+  } catch {
+    toast.error('No se pudo descargar el progreso del usuario');
+  }
+};
+
+const loadAllSales = async () => {
+  try {
+    const response = await $api.get('/sales');
+    allSales.value = response.data?.data ?? [];
+  } catch {
+    toast.error('No se pudieron cargar las ventas globales');
+  }
+};
+
+const loadTeamProgress = async () => {
+  try {
+    const response = await $api.get('/progress');
+    teamProgressItems.value = response.data?.data ?? [];
+  } catch {
+    toast.error('No se pudo descargar el progreso general');
+  }
+};
+
+const loadPromotors = async () => {
+  try {
+    const response = await $api.get('/users/promotors');
+    promotors.value = response.data?.data ?? [];
+  } catch {
+    toast.error('No se pudieron cargar los promotores');
+  }
+};
+
+onMounted(() => {
+  authStore.restoreSession();
+  hydrated.value = true;
+
+  if (isPromotor.value) {
+    loadUserSales();
+    loadUserProgress();
+    return;
+  }
+
+  loadAllSales();
+  loadTeamProgress();
+  loadPromotors();
+});
 </script>
-
-<style scoped>
-.hover-lift {
-  cursor: pointer;
-}
-
-.hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-}
-
-.hover-bg {
-  transition: background-color 0.2s ease;
-}
-
-.hover-bg:hover {
-  background-color: var(--v-theme-surface-elevated) !important;
-}
-
-.opacity-90 {
-  opacity: 0.9;
-}
-</style>

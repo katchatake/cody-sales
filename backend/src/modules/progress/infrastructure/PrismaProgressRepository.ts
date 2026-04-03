@@ -5,7 +5,13 @@ import prisma from "../../../config/database";
 export class PrismaProgressRepository implements ProgressRepository {
     async getMonthlyProgress(month: number, year: number): Promise<Progress[]> {
         const goals = await prisma.goal.findMany({
-            where: { month, year },
+            where: {
+                month,
+                year,
+                promotor: {
+                    role: "PROMOTOR"
+                }
+            },
             include: { promotor: true }
         });
 
@@ -41,7 +47,14 @@ export class PrismaProgressRepository implements ProgressRepository {
 
     async getMonthlyProgressByPromotorId(promotorId: number, month: number, year: number): Promise<Progress | null> {
         const goal = await prisma.goal.findFirst({
-            where: { promotorId, month, year },
+            where: {
+                promotorId,
+                month,
+                year,
+                promotor: {
+                    role: "PROMOTOR"
+                }
+            },
             include: { promotor: true }
         });
 
