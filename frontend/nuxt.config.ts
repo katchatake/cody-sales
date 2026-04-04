@@ -5,10 +5,10 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  
+
   // As Nuxt 4 minimal template uses the srcDir strategy or auto-imports inside `app`, 
   // We can explicitly point srcDir if needed, but the minimal template handles it.
-  
+
   build: {
     transpile: ['vuetify'],
   },
@@ -19,7 +19,7 @@ export default defineNuxtConfig({
       pathPrefix: false
     }
   ],
-  
+
   modules: [
     '@pinia/nuxt',
     (_options, nuxt) => {
@@ -29,7 +29,7 @@ export default defineNuxtConfig({
       });
     },
   ],
-  
+
   vite: {
     plugins: [
       tsconfigPaths()
@@ -40,11 +40,18 @@ export default defineNuxtConfig({
       },
     },
   },
-  
+
   css: [
     '~/assets/scss/global.scss'
   ],
-  
+
+  runtimeConfig: {
+    internalApiUrl: process.env.NUXT_INTERNAL_API_URL || 'http://localhost:3001/api/v1',
+    public: {
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
+    }
+  },
+
   app: {
     head: {
       title: 'Cody Sales App',

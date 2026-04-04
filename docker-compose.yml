@@ -1,0 +1,76 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cody-sales-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root-secret
+      MYSQL_DATABASE: cody_sales
+      MYSQL_USER: cody_sales
+      MYSQL_PASSWORD: cody_sales
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot-secret"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - codysales
+
+  cody-sales-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cody-sales-api
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DATABASE_URL: mysql://cody_sales:cody_sales@mysql:3306/cody_sales
+      JWT_SECRET: cody-sales-super-secret-key-1234
+      RUN_SEED: "true"
+    ports:
+      - "4100:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - codysales
+
+  cody-sales-front:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cody-sales-front
+    restart: unless-stopped
+    environment:
+      NUXT_INTERNAL_API_URL: http://cody-sales-api:3001/api/v1
+      NUXT_PUBLIC_API_URL: http://localhost:4100/api/v1
+      NITRO_HOST: 0.0.0.0
+      NITRO_PORT: 3000
+    ports:
+      - "4000:3000"
+    depends_on:
+      cody-sales-api:
+        condition: service_healthy
+    networks:
+      - codysales
+
+networks:
+  codysales:
+
+volumes:
+  mysql-data:

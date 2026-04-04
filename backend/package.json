@@ -6,9 +6,10 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "docker:start": "prisma db push && if [ \"$RUN_SEED\" = \"true\" ]; then npm run db:seed; fi && node dist/server.js",
+    "db:seed": "ts-node prisma/seed.ts",
     "db:setup": "prisma generate && prisma migrate dev --name init && ts-node prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && prisma generate && ts-node prisma/seed.ts",
-    "docker:start": "prisma migrate deploy && ts-node prisma/seed.ts && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

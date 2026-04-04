@@ -1,9 +1,12 @@
 import axios from "axios";
-import { defineNuxtPlugin } from "#imports";
+import { defineNuxtPlugin, useRuntimeConfig } from "#imports";
 
 export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig();
   const api = axios.create({
-    baseURL: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
+    baseURL: import.meta.server
+      ? config.internalApiUrl
+      : config.public.apiUrl,
   });
 
   api.interceptors.request.use((config) => {

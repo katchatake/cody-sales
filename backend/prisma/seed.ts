@@ -6,8 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding Database...");
 
-  // 1. Create Admin
-  const admin = await prisma.user.upsert({
+  const defaultPassword = bcrypt.hashSync("promotor", 10);
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  await prisma.user.upsert({
     where: { email: "admin@cody.com" },
     update: {},
     create: {
@@ -18,8 +22,7 @@ async function main() {
     },
   });
 
-  // 2. Create Supervisor
-  const supervisor = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "super@cody.com" },
     update: {},
     create: {
@@ -30,43 +33,135 @@ async function main() {
     },
   });
 
-  // 3. Create Promotor
-  const promotor = await prisma.user.upsert({
-    where: { email: "promotor1@cody.com" },
-    update: {},
-    create: {
-      email: "promotor1@cody.com",
-      name: "John Promotor",
-      password: bcrypt.hashSync("promotor", 10),
-      role: Role.PROMOTOR,
-    },
-  });
+  const promotors = await Promise.all([
+    prisma.user.upsert({
+      where: { email: "promotor1@cody.com" },
+      update: {},
+      create: {
+        email: "promotor1@cody.com",
+        name: "John Promotor",
+        password: defaultPassword,
+        role: Role.PROMOTOR,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "promotor2@cody.com" },
+      update: {},
+      create: {
+        email: "promotor2@cody.com",
+        name: "Ana Ruiz",
+        password: defaultPassword,
+        role: Role.PROMOTOR,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "promotor3@cody.com" },
+      update: {},
+      create: {
+        email: "promotor3@cody.com",
+        name: "Carlos Vega",
+        password: defaultPassword,
+        role: Role.PROMOTOR,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "promotor4@cody.com" },
+      update: {},
+      create: {
+        email: "promotor4@cody.com",
+        name: "Luisa Moreno",
+        password: defaultPassword,
+        role: Role.PROMOTOR,
+      },
+    }),
+  ]);
 
-  // 4. Create Category
-  const category1 = await prisma.category.create({
-    data: {
-      name: "Electronics",
-      description: "Devices and gadgets",
-    },
-  });
+  const categories = await Promise.all([
+    prisma.category.upsert({
+      where: { id: 1 },
+      update: {
+        name: "Electronics",
+        description: "Devices and gadgets",
+      },
+      create: {
+        name: "Electronics",
+        description: "Devices and gadgets",
+      },
+    }),
+    prisma.category.upsert({
+      where: { id: 2 },
+      update: {
+        name: "Home Appliances",
+        description: "Useful products for home and kitchen",
+      },
+      create: {
+        name: "Home Appliances",
+        description: "Useful products for home and kitchen",
+      },
+    }),
+    prisma.category.upsert({
+      where: { id: 3 },
+      update: {
+        name: "Computing",
+        description: "Accessories and devices for workstations",
+      },
+      create: {
+        name: "Computing",
+        description: "Accessories and devices for workstations",
+      },
+    }),
+  ]);
 
-  // 5. Create Products
-  await prisma.product.createMany({
-    data: [
-      { name: "Smartphone Pro", price: 999.99, categoryId: category1.id },
-      { name: "Wireless Earbuds", price: 149.5, categoryId: category1.id },
-    ],
-  });
+  const categoryByName = Object.fromEntries(categories.map((category) => [category.name, category.id]));
 
-  // 6. Create Goal
-  await prisma.goal.create({
-    data: {
-      target: 5000,
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
-      promotorId: promotor.id,
-    },
-  });
+  const products = [
+    { name: "Smartphone Pro", price: 999.99, categoryName: "Electronics" },
+    { name: "Wireless Earbuds", price: 149.5, categoryName: "Electronics" },
+    { name: "Smart TV 55", price: 799.0, categoryName: "Electronics" },
+    { name: "Air Fryer Max", price: 189.99, categoryName: "Home Appliances" },
+    { name: "Robot Vacuum", price: 349.0, categoryName: "Home Appliances" },
+    { name: "Coffee Maker Plus", price: 119.9, categoryName: "Home Appliances" },
+    { name: "Mechanical Keyboard", price: 129.99, categoryName: "Computing" },
+    { name: "UltraWide Monitor", price: 459.5, categoryName: "Computing" },
+    { name: "USB-C Dock Station", price: 89.9, categoryName: "Computing" },
+  ];
+
+  for (const product of products) {
+    await prisma.product.upsert({
+      where: { id: products.indexOf(product) + 1 },
+      update: {
+        name: product.name,
+        price: product.price,
+        categoryId: categoryByName[product.categoryName],
+      },
+      create: {
+        name: product.name,
+        price: product.price,
+        categoryId: categoryByName[product.categoryName],
+      },
+    });
+  }
+
+  for (const promotor of promotors) {
+    const existingGoal = await prisma.goal.findFirst({
+      where: {
+        promotorId: promotor.id,
+        month: currentMonth,
+        year: currentYear,
+      },
+    });
+
+    if (!existingGoal) {
+      await prisma.goal.create({
+        data: {
+          target: 5000 + promotor.id * 250,
+          month: currentMonth,
+          year: currentYear,
+          promotorId: promotor.id,
+        },
+      });
+    }
+  }
 
   console.log("Seeding completed.");
 }
