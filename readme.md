@@ -75,7 +75,7 @@ El frontend implementa:
 - dashboard por rol,
 - pantallas para ventas, metas y progreso.
 
-## Instalación recomendada con Docker
+## Instalación rápida, recomendada con Docker
 
 Esta es la forma más simple de levantar todo el proyecto.
 
@@ -105,7 +105,9 @@ El `docker-compose.yml` ya configura:
 - variables del backend y frontend,
 - puertos expuestos.
 
-## Instalación local paso a paso
+Ve a la Sección de Usuarios existentes para obtener las credenciales de acceso.
+
+## Instalación local para desarrollo paso a paso
 
 Si prefieres ejecutar frontend y backend fuera de contenedores, puedes usar MySQL local o levantar solo MySQL con Docker.
 
