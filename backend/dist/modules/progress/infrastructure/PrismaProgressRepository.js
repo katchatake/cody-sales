@@ -18,7 +18,6 @@ class PrismaProgressRepository {
             },
             include: { promotor: true }
         });
-        // month is 1-indexed for the user, 0-indexed in JS Date
         const startOfMonth = new Date(year, month - 1, 1);
         const startOfNextMonth = new Date(year, month, 1);
         const salesSummaries = await database_1.default.sale.groupBy({
@@ -35,8 +34,7 @@ class PrismaProgressRepository {
             const saleSummary = salesSummaries.find((s) => s.promotorId === g.promotorId);
             const totalSold = saleSummary?._sum.total || 0;
             const percentage = g.target > 0 ? (totalSold / g.target) * 100 : 0;
-            return new Progress_1.Progress(g.promotorId, g.promotor.name, totalSold, g.target, parseFloat(percentage.toFixed(2)) // Round to 2 decimals cleanly
-            );
+            return new Progress_1.Progress(g.promotorId, g.promotor.name, totalSold, g.target, parseFloat(percentage.toFixed(2)));
         });
     }
     async getMonthlyProgressByPromotorId(promotorId, month, year) {

@@ -10,13 +10,10 @@ const progressController = new ProgressController();
 
 progressRoutes.get(
   "/",
-  // verifyToken,
-  // forbidRoles("PROMOTOR"),
   progressController.getProgress.bind(progressController),
 );
 
 progressRoutes.get(
   "/:id",
-  // verifyToken,
   progressController.getProgressByPromotor.bind(progressController),
 );

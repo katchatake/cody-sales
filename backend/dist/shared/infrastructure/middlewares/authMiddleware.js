@@ -15,7 +15,6 @@ const verifyToken = (req, res, next) => {
     try {
         const secret = process.env.JWT_SECRET || "default_secret";
         const decoded = jsonwebtoken_1.default.verify(token, secret);
-        // Extend Request object to include the user payload
         req.user = decoded;
         next();
     }

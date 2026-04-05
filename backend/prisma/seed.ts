@@ -4,8 +4,6 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding Database...");
-
   const defaultPassword = bcrypt.hashSync("promotor", 10);
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -162,8 +160,6 @@ async function main() {
       });
     }
   }
-
-  console.log("Seeding completed.");
 }
 
 main()

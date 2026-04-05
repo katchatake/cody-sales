@@ -10,8 +10,7 @@ class Sale {
     saleDate;
     createdAt;
     product;
-    constructor(id, promotorId, productId, quantity, total, saleDate, createdAt, product // allows fetching relational data from Prima via include: { product: true }
-    ) {
+    constructor(id, promotorId, productId, quantity, total, saleDate, createdAt, product) {
         this.id = id;
         this.promotorId = promotorId;
         this.productId = productId;

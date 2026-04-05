@@ -3,15 +3,11 @@ import { GetMonthlyProgressByPromotorUseCase } from "../../progress/application/
 import prisma from "../../../config/database";
 
 export class GoalAchievedService {
-    /**
-     * Revisa y guarda sincrónicamente en DB si la última venta rompió un nuevo hito.
-     * Retorna un arreglo numérico con los hitos consolidados recién ganados (ej: [50]).
-     */
     static async checkMilestones(promotorId: number, saleDate: Date): Promise<number[]> {
         const milestonesAchieved: number[] = [];
 
         try {
-            const month = saleDate.getMonth() + 1; // 1-12
+            const month = saleDate.getMonth() + 1;
             const year = saleDate.getFullYear();
 
             const repo = new PrismaProgressRepository();
@@ -28,8 +24,6 @@ export class GoalAchievedService {
 
             for (const umbral of hitos) {
                 if (nuevoProgreso >= umbral) {
-
-                    // ¿Ya tiene registrado este string "50" en este mes?
                     const existing = await prisma.goalAchieved.findFirst({
                         where: {
                             promotorId,
@@ -42,14 +36,12 @@ export class GoalAchievedService {
                     });
 
                     if (!existing) {
-                        // Guardado efectivo
                         await prisma.goalAchieved.create({
                             data: {
                                 promotorId,
                                 typeHito: umbral.toString()
                             }
                         });
-                        console.log(`[Sales-Goal-Cross] 🏆 Hito Automático: ¡Alcanzado el ${umbral}%!`);
                         milestonesAchieved.push(umbral);
                     }
                 }

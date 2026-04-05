@@ -13,8 +13,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     try {
         const secret = process.env.JWT_SECRET || "default_secret";
         const decoded = jwt.verify(token, secret);
-        
-        // Extend Request object to include the user payload
+
         (req as any).user = decoded;
         next();
     } catch (error) {

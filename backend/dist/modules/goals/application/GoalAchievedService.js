@@ -8,14 +8,10 @@ const PrismaProgressRepository_1 = require("../../progress/infrastructure/Prisma
 const GetMonthlyProgressByPromotorUseCase_1 = require("../../progress/application/GetMonthlyProgressByPromotorUseCase");
 const database_1 = __importDefault(require("../../../config/database"));
 class GoalAchievedService {
-    /**
-     * Revisa y guarda sincrónicamente en DB si la última venta rompió un nuevo hito.
-     * Retorna un arreglo numérico con los hitos consolidados recién ganados (ej: [50]).
-     */
     static async checkMilestones(promotorId, saleDate) {
         const milestonesAchieved = [];
         try {
-            const month = saleDate.getMonth() + 1; // 1-12
+            const month = saleDate.getMonth() + 1;
             const year = saleDate.getFullYear();
             const repo = new PrismaProgressRepository_1.PrismaProgressRepository();
             const progressUseCase = new GetMonthlyProgressByPromotorUseCase_1.GetMonthlyProgressByPromotorUseCase(repo);
@@ -28,7 +24,6 @@ class GoalAchievedService {
             const startOfNextMonth = new Date(year, month, 1);
             for (const umbral of hitos) {
                 if (nuevoProgreso >= umbral) {
-                    // ¿Ya tiene registrado este string "50" en este mes?
                     const existing = await database_1.default.goalAchieved.findFirst({
                         where: {
                             promotorId,
@@ -40,14 +35,12 @@ class GoalAchievedService {
                         }
                     });
                     if (!existing) {
-                        // Guardado efectivo
                         await database_1.default.goalAchieved.create({
                             data: {
                                 promotorId,
                                 typeHito: umbral.toString()
                             }
                         });
-                        console.log(`[Sales-Goal-Cross] 🏆 Hito Automático: ¡Alcanzado el ${umbral}%!`);
                         milestonesAchieved.push(umbral);
                     }
                 }

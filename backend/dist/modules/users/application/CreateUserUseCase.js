@@ -8,7 +8,6 @@ class CreateUserUseCase {
         this.userRepository = userRepository;
     }
     async execute(data) {
-        // Here you can add business validation
         const existingUser = await this.userRepository.findByEmail(data.email);
         if (existingUser) {
             throw new Error('User with this email already exists');

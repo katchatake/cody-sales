@@ -7,17 +7,12 @@ const app_1 = __importDefault(require("./app"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const database_1 = require("./config/database");
-// Load env vars
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
 const PORT = process.env.PORT || 3001;
 const startServer = async () => {
     try {
-        // Initialize Database connections here
         await (0, database_1.checkDatabaseConnection)();
-        app_1.default.listen(PORT, () => {
-            console.log(`Server is running on port: ${PORT}`);
-            console.log(`Health check: http://localhost:${PORT}/health`);
-        });
+        app_1.default.listen(PORT);
     }
     catch (error) {
         console.error('Failed to start server:', error);

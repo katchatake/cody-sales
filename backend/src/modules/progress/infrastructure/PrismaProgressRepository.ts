@@ -15,7 +15,6 @@ export class PrismaProgressRepository implements ProgressRepository {
             include: { promotor: true }
         });
 
-        // month is 1-indexed for the user, 0-indexed in JS Date
         const startOfMonth = new Date(year, month - 1, 1);
         const startOfNextMonth = new Date(year, month, 1);
 
@@ -40,7 +39,7 @@ export class PrismaProgressRepository implements ProgressRepository {
                 g.promotor.name,
                 totalSold,
                 g.target,
-                parseFloat(percentage.toFixed(2)) // Round to 2 decimals cleanly
+                parseFloat(percentage.toFixed(2))
             );
         });
     }

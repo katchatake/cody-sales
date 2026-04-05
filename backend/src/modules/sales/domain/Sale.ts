@@ -7,6 +7,6 @@ export class Sale {
         public readonly total: number,
         public readonly saleDate?: Date,
         public readonly createdAt?: Date,
-        public readonly product?: any // allows fetching relational data from Prima via include: { product: true }
+        public readonly product?: any
     ) {}
 }

@@ -8,10 +8,6 @@ const authMiddleware_1 = require("../../../shared/infrastructure/middlewares/aut
 const SaleValid_1 = require("./SaleValid");
 exports.saleRoutes = (0, express_1.Router)();
 const saleController = new SaleController_1.SaleController();
-// 1. POST /api/v1/sales - Save a sale
-exports.saleRoutes.post("/", authMiddleware_1.verifyToken, // Inject req.user to extract promotorId automatically
-(0, validateRequest_1.validateRequest)(SaleValid_1.createSaleSchema), saleController.createSale.bind(saleController));
-// 2. GET /api/v1/sales - Get all sales
+exports.saleRoutes.post("/", authMiddleware_1.verifyToken, (0, validateRequest_1.validateRequest)(SaleValid_1.createSaleSchema), saleController.createSale.bind(saleController));
 exports.saleRoutes.get("/", authMiddleware_1.verifyToken, saleController.getSales.bind(saleController));
-// 3. GET /api/v1/sales/user/:id - Get sales by specific promotor (user)
 exports.saleRoutes.get("/:id", authMiddleware_1.verifyToken, saleController.getSalesByUser.bind(saleController));

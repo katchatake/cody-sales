@@ -15,7 +15,6 @@ export class GoalController {
 
     async getGoals(req: Request, res: Response): Promise<void> {
         const repository = new PrismaGoalRepository();
-        // Since we are creating a new usecase inline here for speed: (Alternatively we'd inject it via constructor)
         const { GetAllGoalsUseCase } = await import("../application/GetAllGoalsUseCase");
         const useCase = new GetAllGoalsUseCase(repository);
         

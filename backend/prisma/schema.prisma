@@ -53,7 +53,7 @@ model Goal {
   id         Int      @id @default(autoincrement())
   promotorId Int
   target     Float
-  month      Int // 1-12
+  month      Int
   year       Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
