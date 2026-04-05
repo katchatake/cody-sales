@@ -2,6 +2,37 @@
 
 Este documento detalla las decisiones arquitectónicas y tecnológicas detrás del backend de **Cody Sales**. La finalidad de este archivo es servir como punto de consulta para comprender cómo está estructurado el proyecto a nivel conceptual y el porqué de cada herramienta utilizada.
 
+## Prioridad para Escenario de Producción
+
+Si este módulo fuera a producción con **10,000 usuarios activos**, la prioridad principal sería reforzar **rendimiento, concurrencia y observabilidad**.
+
+Las primeras decisiones de evolución serían:
+
+1. **Introducir Redis**
+   Para cachear consultas frecuentes como catálogo de productos, categorías, promotores y resúmenes de progreso.
+
+2. **Reducir lecturas repetidas a MySQL**
+   El objetivo sería bajar la latencia en endpoints de consulta y descargar operaciones repetitivas de la base de datos principal.
+
+3. **Usar Redis como apoyo operativo**
+   Además del caché, también serviría para rate limiting y, si fuera necesario, para manejo temporal de sesiones o bloqueos livianos.
+
+4. **Optimizar capa de base de datos**
+   Se agregarían índices, paginación y revisión puntual de queries agregadas.
+
+5. **Optimizar funciones de eventos y notificaciones**
+   También sería importante fortalecer el manejo de eventos internos y notificaciones para tener mejor visibilidad operativa y facilitar la incorporación de nuevos eventos dentro de los flujos activos. Esto ayudaría a mantener un comportamiento más controlado y trazable del sistema bajo una carga de 10,000 usuarios, especialmente en procesos relacionados con ventas, metas, progreso y acciones derivadas del negocio.
+
+Lo que quedó fuera por tiempo en la versión actual fue precisamente esa capa de caché, además de métricas, tracing y pruebas de carga.
+
+Si se continuara la evolución del módulo, el orden de prioridad sería:
+
+1. `Redis`
+2. `Observabilidad`
+3. `Tuning SQL`
+4. `Optimización de eventos y notificaciones`
+5. `Pruebas de estrés`
+
 ## 🏗 Tipo de Estructura: Arquitectura Hexagonal (Ports and Adapters)
 
 El proyecto está diseñado bajo los principios de la **Arquitectura Hexagonal**, dividiendo cada módulo funcional de la aplicación (como `auth`, `sales`, `catalog`, etc.) en capas estrictamente delimitadas por responsabilidades.
